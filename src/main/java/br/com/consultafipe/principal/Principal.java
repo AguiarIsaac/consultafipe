@@ -1,7 +1,8 @@
 package br.com.consultafipe.principal;
 
 import br.com.consultafipe.model.DadosMarca;
-import br.com.consultafipe.model.DadosModelo;
+import br.com.consultafipe.model.ModeloVeiculo;
+import br.com.consultafipe.model.Modelos;
 import br.com.consultafipe.service.ConsumoApi;
 import br.com.consultafipe.service.ConverteDados;
 
@@ -13,6 +14,18 @@ public class Principal {
     private Scanner leitura = new Scanner(System.in);
     private ConsumoApi api = new ConsumoApi();
     private ConverteDados converteDados = new ConverteDados();
+
+    public void iniciar() {
+        boolean continuar = true;
+        do {
+            exibeMenu();
+            System.out.println("\nDeseja fazer outra consulta? (s/n)");
+            String resposta = leitura.nextLine();
+            continuar = resposta.equalsIgnoreCase("s");
+        } while (continuar);
+        System.out.println("\nObrigado por usar a consulta FIPE!");
+    }
+
     public void exibeMenu() {
         System.out.println("""
                 ======================> CONSULTA FIPE <===============================
@@ -59,33 +72,26 @@ public class Principal {
 
         json = api.obterDados(endereco);
 
-        System.out.println(json);
+        Modelos modelos = converteDados.obterDados(json, Modelos.class);
 
-//        List<DadosModelo> dadosModelos = converteDados.obterlista(json, DadosModelo.class);
-//
-//        System.out.println(dadosModelos);
-//
-//        String modelos = api.obterDados(endereco);
-//
-//        System.out.println(modelos);
-//
-//        System.out.println("Digite o código do modelo desejado: ");
-//
-//        var codModelo = Integer.valueOf(leitura.nextLine());
-//
-//        endereco = "https://parallelum.com.br/fipe/api/v1/motos/marcas/80/modelos/"+codModelo+"/anos";
-//        System.out.println(endereco);
-//
-//        String anoModelo = api.obterDados(endereco);
-//
-//        System.out.println(anoModelo);
-//
-//        System.out.println("Digite o ano: ");
-//
-//        String codAno = leitura.nextLine();
-//
-//        String resultadoFinal = api.obterDados("https://parallelum.com.br/fipe/api/v1/motos/marcas/80/modelos/"+codModelo+"/anos/" + codAno);
-//
-//        System.out.println(resultadoFinal);
+        modelos.modelos().forEach(System.out::println);
+
+        System.out.println("\nAgora Informe o código do modelo desejado: ");
+
+        var codModelo = Integer.parseInt(leitura.nextLine());
+
+        modelos.anos().forEach(System.out::println);
+
+        System.out.println("\n Por ultimo, digite o código do ano: ");
+
+        var codAno = leitura.nextLine();
+
+        endereco = endereco + "/" + codModelo + "/anos/" + codAno;
+
+        json = api.obterDados(endereco);
+
+        ModeloVeiculo modeloVeiculo = converteDados.obterDados(json, ModeloVeiculo.class);
+
+        System.out.println(modeloVeiculo);
     }
 }
